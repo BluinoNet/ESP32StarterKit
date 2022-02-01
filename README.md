@@ -2,7 +2,7 @@
 
 ![BluinoNet](https://images.tokopedia.net/img/cache/900/VqbcmM/2021/3/21/91c34e84-ea68-4524-bc06-90e84c67463c.jpg)
 
-This demo is using ESP 32 Starter Kit from Bluino Store [ESP32 Basic Shield](https://www.tokopedia.com/bluino/esp32-iot-starter-kit)
+This demo is using ESP 32 Starter Kit from Bluino Store [ESP32 Starter Kit](https://www.tokopedia.com/bluino/esp32-iot-starter-kit)
 
 .NET nanoFramework is a free and open-source platform that enables the writing of managed code applications for constrained embedded devices.
 
