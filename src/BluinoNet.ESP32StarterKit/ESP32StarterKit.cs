@@ -34,6 +34,7 @@ namespace BluinoNet
         public DS18B20 BoardDS18B20 { get; set; }
         public Dht11 BoardDHT11 { get; set; }
         public SSD1306Imp BoardDisplay { get; set; }
+        public Mpu6050 BoardMpu6050 { get; set; }
 
         /// <summary>
         /// Get SPI Interface for module communication
@@ -194,6 +195,10 @@ namespace BluinoNet
 
             };
 
+        }
+        public void SetupMpu6050()
+        {
+            BoardMpu6050 = new Mpu6050();
         }
     }
     public class ESP32Pwms

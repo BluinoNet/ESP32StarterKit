@@ -29,6 +29,7 @@
     <Compile Include="Modules\MicroSd\MicroSd.cs" />
     <Compile Include="Modules\MicroSd\MicroSdConfiguration.cs" />
     <Compile Include="Modules\MicroSd\Spi.cs" />
+    <Compile Include="Modules\Mpu6050.cs" />
     <Compile Include="Modules\PIR.cs" />
     <Compile Include="Modules\Potensiometer.cs" />
     <Compile Include="Modules\Relay.cs" />
