@@ -1,7 +1,7 @@
 ﻿using BluinoNet.Modules;
 using BMC.Drivers.BasicGraphics;
 using System;
-using System.Collections.Generic;
+//
 using System.Device.I2c;
 using System.Text;
 

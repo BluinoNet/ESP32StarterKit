@@ -1,5 +1,4 @@
 ﻿using BluinoNet.Modules;
-using Iot.Device.Bmxx80;
 using Iot.Device.DHTxx.Esp32;
 using nanoFramework.Hardware.Esp32;
 using System;
@@ -12,6 +11,23 @@ namespace BluinoNet
 {
     public class ESP32StarterKit
     {
+        bool IsInitRelay = false;
+        bool IsInitButton = false;
+        bool IsInitBuzzer = false;
+        bool IsInitLed = false;
+        bool IsInitRgb = false;
+        bool IsInitMicroSd = false;
+        bool IsInitLight = false;
+        bool IsInitPir = false;
+        bool IsInitTouch = false;
+        bool IsInitPotentiometer = false;
+        bool IsInitBME = false;
+        bool IsInitDS18 = false;
+        bool IsInitDHT11 = false;
+        bool IsInitDisplay = false;
+        bool IsInitMpu = false;
+        bool IsInitServo = false;
+
         GpioController controller;
         // Browse our samples repository: https://github.com/nanoframework/samples
         // Check our documentation online: https://docs.nanoframework.net/
@@ -30,11 +46,13 @@ namespace BluinoNet
         public PIR BoardPIR { get; set; }
         public TouchSensor BoardTouchSensor { get; set; }
         public Potentiometer BoardPotentiometer { get; set; }
-        public Bme280 BoardBME280 { get; set; }
+        public Bmp180Module BoardBMP180 { get; set; }
         public DS18B20 BoardDS18B20 { get; set; }
-        public Dht11 BoardDHT11 { get; set; }
+        public DHT11Module BoardDHT11 { get; set; }
         public SSD1306Imp BoardDisplay { get; set; }
         public Mpu6050 BoardMpu6050 { get; set; }
+        public ServoController BoardServo { get; set; }
+        public HCSR04 BoardHCSR04 { get; set; }
 
         /// <summary>
         /// Get SPI Interface for module communication
@@ -101,17 +119,18 @@ namespace BluinoNet
             var pwm = PwmChannel.CreateFromPin(pinNumber);
             return pwm;
         }
-        //public ESP32BasicShield(int PinButton, int PinBuzzer, int PinLed, int PinRelay) : this()
-        //{
-        //    SetupRelay(PinRelay);
+        public ESP32StarterKit(int PinButton1,int PinButton2, int PinBuzzer, int PinLed1,int PinLed2,int PinLed3,int PinLed4, 
+            int PinRelay) : this()
+        {
+            SetupRelay(PinRelay);
 
-        //    SetupButton(PinButton);
+            SetupButton(PinButton1,PinButton2);
 
-        //    SetupBuzzer(PinBuzzer);
+            SetupBuzzer(PinBuzzer);
 
-        //    SetupLed(PinLed);
+            SetupLed(PinLed1, PinLed2, PinLed3, PinLed4);
 
-        //}
+        }
 
         public ESP32StarterKit()
         {
@@ -127,78 +146,113 @@ namespace BluinoNet
                 this.BoardLed3 = new Led(PinLed3);
             if(PinLed4>0)
                 this.BoardLed4 = new Led(PinLed4);
+            IsInitLed = true;
         }
 
         public void SetupBuzzer(int PinBuzzer)
         {
             this.BoardBuzzer = new Tunes(PinBuzzer);
+            IsInitBuzzer = true;
+
         } 
-        public void SetupPIT(int PinPIR)
+        
+        public void SetupHCSR04(int PinTrigger,int PinEcho)
+        {
+            this.BoardHCSR04 = new HCSR04 (PinTrigger,PinEcho);
+
+        }
+        public void SetupPIR(int PinPIR)
         {
             this.BoardPIR = new PIR(PinPIR);
+            IsInitPir = true;
+
         }
         public void SetupButton(int PinButton1,int PinButton2)
         {
             this.BoardButton1 = new Button(PinButton1);
             this.BoardButton2 = new Button(PinButton2);
+            IsInitButton = true;
+
         }
         public void SetupRelay(int PinRelay)
         {
             this.BoardRelay = new Relay(PinRelay);
+            IsInitRelay = true;
+
         }
-        
+
+        public void SetupServo(int PinServo)
+        {
+            this.BoardServo = new ServoController(PinServo);
+            IsInitServo = true;
+
+        }
+
         public void SetupLedRgb(int PinR,int PinG,int PinB)
         {
             this.BoardLedRgb = new RgbLedPwm(PinR,PinG,PinB);
-        } 
-        
+            IsInitRgb = true;
+
+        }
+
         public void SetupLightSensor(int ChannelNum)
         {
             this.BoardLightSensor = new LDR (ChannelNum);
+            IsInitLight = true;
+
         }
         public void SetupTouchSensor(int PinNumber)
         {
             this.BoardTouchSensor = new TouchSensor(PinNumber);
-        } 
+            IsInitTouch = true;
+
+        }
         public void SetupPotentiometer(int PinNumber)
         {   
             this.BoardPotentiometer = new Potentiometer (PinNumber);
+            IsInitPotentiometer = true;
+
         }
-        
+
         public void SetupDS18B20(int OneWirePin)
         {
             this.BoardDS18B20 = new DS18B20(OneWirePin);
+            IsInitDS18 = true;
+
         }
-        public void SetupDHT11(int PinEcho,int PinTrigger)
+
+        public void SetupMicroSD(int CSPin)
+        {
+            Modules.FatFsNano.MicroSdConfiguration.Setup(CSPin,1);
+        }
+        public void SetupDHT11(int PinNumber)
         {
           
-            BoardDHT11 = new Dht11(PinEcho,PinTrigger);
-        }  
-        
+            BoardDHT11 = new  DHT11Module(PinNumber);   
+            IsInitDHT11 = true;
+
+        }
+
         public void SetupDisplay()
         {
             Configuration.SetPinFunction(ESP32Pins.IO22, DeviceFunction.I2C1_CLOCK);
             Configuration.SetPinFunction(ESP32Pins.IO21, DeviceFunction.I2C1_DATA);
             BoardDisplay = new SSD1306Imp();
+            IsInitDisplay = true;
+
         }
 
-        public void SetupBME280()
+        public void SetupBMP180()
         {
-            
-            var i2cDevice = GetI2C(Bme280.DefaultI2cAddress, I2cBusSpeed.StandardMode, 1);
-            BoardBME280 = new Bme280(i2cDevice)
-            {
-                // set higher sampling
-                TemperatureSampling = Sampling.LowPower,
-                PressureSampling = Sampling.UltraHighResolution,
-                HumiditySampling = Sampling.Standard,
-
-            };
+            BoardBMP180 = new Bmp180Module();
+            IsInitBME = true;
 
         }
         public void SetupMpu6050()
         {
             BoardMpu6050 = new Mpu6050();
+            IsInitMpu = true;
+
         }
     }
     public class ESP32Pwms
