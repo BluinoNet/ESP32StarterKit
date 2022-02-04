@@ -190,21 +190,20 @@ board.SetupMpu6050();
             board.SetupDisplay();
             var colorB = BasicGraphics.ColorFromRgb(255, 255, 255);
             var screen = board.BoardDisplay;
-           
-            while (true)
-            {
-                board.BoardMpu6050.StartUpdating();
+            board.BoardMpu6050.StartUpdating();
+            board.BoardMpu6050.SensorInterruptEvent += (a, e) => {
                 screen.Clear();
-                screen.DrawString("GYRO", colorB, 0, 1, 1, 1);
-                screen.DrawString($"{board.BoardMpu6050.XGyroscopicAcceleration.ToString("n3")},{board.BoardMpu6050.YGyroscopicAcceleration.ToString("n3")},{board.BoardMpu6050.ZGyroscopicAcceleration.ToString("n3")} ", colorB, 0, 10, 1, 1);
+                for (int i = 0; i < e.Values.Length; i++)
+                {
+                    screen.DrawString("ACCEL", colorB, 0, 1, 1, 1);
+                    screen.DrawString($"{e.Values[i].AccelerationX.ToString("n3")},{e.Values[i].AccelerationY.ToString("n3")},{e.Values[i].AccelerationZ.ToString("n3")} ", colorB, 0, 10, 1, 1);
 
-                screen.DrawString("ACCEL", colorB, 0, 25, 1, 1);
-                screen.DrawString($"{board.BoardMpu6050.AccelerationX.ToString("n3")},{board.BoardMpu6050.AccelerationY.ToString("n3")},{board.BoardMpu6050.AccelerationZ.ToString("n3")} ", colorB, 0, 35, 1, 1);
-
+                    screen.DrawString("GYRO", colorB, 0, 25, 1, 1);
+                    screen.DrawString($"{e.Values[i].GyroX.ToString("n3")},{e.Values[i].GyroY.ToString("n3")},{e.Values[i].GyroZ.ToString("n3")} ", colorB, 0, 35, 1, 1);
+                    break;
+                }
                 screen.Flush();
-                board.BoardMpu6050.StopUpdating();
-                Thread.Sleep(300);
-            }
+            };
 ```
 
 ## DS18B20
