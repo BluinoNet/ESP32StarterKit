@@ -1,9 +1,175 @@
 ﻿using nanoFramework.Devices.OneWire;
 using System;
+using System.Collections;
+using System.Diagnostics;
 using System.Threading;
 
 namespace BluinoNet.Modules
-{
+{/// <summary>
+ /// DS18B20 Programmable Resolution 1-Wire Digital Thermometer
+ /// </summary>
+    public class DS18B20
+    {
+        public const byte FamilyCode = 0x28;
+
+        // Commands
+        public const byte ConvertT = 0x44;
+        public const byte CopyScratchpad = 0x48;
+        public const byte WriteScratchpad = 0x4E;
+        public const byte ReadPowerSupply = 0xB4;
+        public const byte RecallE2 = 0xB8;
+        public const byte ReadScratchpad = 0xBE;
+        public const byte SkipROM = 0xcc;
+        public const byte MatchID = 0x55;
+        // Helpers
+        public static float GetTemperature(byte tempLo, byte tempHi)
+        {
+            return ((short)((tempHi << 8) | tempLo)) / 16F;
+        }
+
+        public DS18B20(int oneWirePin)
+        {
+           var oneWire = new OneWireController();
+            ////////////////////////////////////////////////////////////////////
+            // Sample code to read serial number for a devices present in bus
+            // 
+            // With this approach, three steps are needed:
+            // - Reset 1-Wire bus
+            // - Transmit Read ROM command
+            // - Read 8 bytes (serial number)
+            ////////////////////////////////////////////////////////////////////
+            
+            byte[] state = new byte[13];
+            // check for devices present with a bus reset
+            if (oneWire.TouchReset())
+            {
+                Debug.WriteLine("Device present");
+
+                // tx READ ROM
+                var res = oneWire.WriteByte(0x33);
+
+                // now read 8 byte for SN
+                // and output serial number nicelly formated in hexa
+                for (int i = 0; i < 8; i++)
+                {
+                    // read byte
+                    state[i] = oneWire.TouchByte(0xFF);
+
+                    // output byte
+                    Debug.Write(state[i].ToString("X2"));
+                }
+
+                Debug.WriteLine("");
+            }
+            else
+            {
+                Debug.WriteLine("!! No devices found !!");
+            }
+
+            ////////////////////////////////////////////////////////////////////
+            // Sample code to read serial number for a devices present in bus
+            // 
+            // Just call FindFirstDevice and it will fill OneWire SerialNumber 
+            // buffer with the 1-Wire device serial number present in bus
+            ////////////////////////////////////////////////////////////////////
+            byte[] deviceId = null;
+            if (oneWire.FindFirstDevice(true, false))
+            {
+                Debug.WriteLine("device found:");
+                deviceId = oneWire.SerialNumber;
+                // output serial number nicelly formated in hexa
+                for (int i = 0; i < 8; i++)
+                {
+                    Debug.Write(oneWire.SerialNumber[i].ToString("X2"));
+                }
+
+                Debug.WriteLine("");
+            }
+            else
+            {
+                Debug.WriteLine("!! No devices found !!");
+            }
+            /*
+            ////////////////////////////////////////////////////////////////////
+            // Sample code to read serial number for all devices present in bus
+            // 
+            // Just call FindAllDevices and it will return an array list with 
+            // all 1-Wire devices serial numbers present in bus
+            ////////////////////////////////////////////////////////////////////
+
+            ArrayList snList = oneWire.FindAllDevices();
+
+            if (snList.Count > 0)
+            {
+                Debug.WriteLine(String.Format("{0} devices found", snList.Count));
+
+                foreach (byte[] sn in snList)
+                {
+                    // output serial number nicelly formated in hexa
+                    for (int i = 0; i < 8; i++)
+                    {
+                        Debug.Write(sn[i].ToString("X2"));
+                    }
+
+                    Debug.WriteLine("");
+                }
+            }
+            else
+            {
+                Debug.WriteLine("!! No devices found !!");
+            }*/
+            OneWire = oneWire;
+            _deviceId = deviceId;
+        }
+
+        /// <summary>
+        /// The device ID.
+        /// </summary>
+        byte[] _deviceId;
+
+        /// <summary>
+        /// The one wire bus.
+        /// </summary>
+        public OneWireController OneWire { get; private set; }
+
+        /// <summary>
+        /// The last read temperature.
+        /// </summary>
+        public float Temperature { get; private set; }
+
+        /// <summary>
+        /// Reads the latest temperature from the device.
+        /// </summary>
+        public void Read()
+        {
+            //if (_deviceId[0] == DS18B20.FamilyCode)
+            {
+                OneWire.TouchReset();
+                OneWire.WriteByte(SkipROM); // Address all devices
+                OneWire.WriteByte(DS18B20.ConvertT);
+                Thread.Sleep(750);  // Wait Tconv (for default 12-bit resolution)
+
+                // Write command and identifier at once
+                //var matchRom = new byte[9];
+                //Array.Copy(_deviceId, 0, matchRom, 1, 8);
+                //matchRom[0] = MatchID;
+
+                OneWire.TouchReset();
+                //for (var index = 0; index < matchRom.Length; index++)
+                //{
+                //    OneWire.WriteByte(matchRom[index]);
+                //}
+                OneWire.WriteByte(SkipROM);
+                OneWire.WriteByte(DS18B20.ReadScratchpad);
+
+                // Read just the temperature (2 bytes)
+                var tempLo = OneWire.ReadByte();
+                var tempHi = OneWire.ReadByte();
+                Temperature = GetTemperature(tempLo, tempHi);
+            }
+        }
+    }
+    /*
     public class DS18B20
     {
         object OneWireInstance = new object();
@@ -575,4 +741,5 @@ namespace BluinoNet.Modules
     /// <param name="sender">Object sending the notification.</param>
     /// <param name="e">SensorFloatEventArgs object containing the data for the application.</param>
     public delegate void SensorFloatEventHandler(object sender, SensorFloatEventArgs e);
+*/
 }

@@ -131,7 +131,7 @@ namespace DemoESP32StarterKit
             #endregion
 
             #region MPU6050
-            
+            /*
             board.SetupMpu6050();
             board.SetupDisplay();
             var colorB = BasicGraphics.ColorFromRgb(255, 255, 255);
@@ -150,42 +150,28 @@ namespace DemoESP32StarterKit
                 }
                 screen.Flush();
             };
-            /*
-            while (true)
-            {
-            
-                screen.Clear();
-                screen.DrawString("GYRO", colorB, 0, 1, 1, 1);
-                screen.DrawString($"{board.BoardMpu6050.XGyroscopicAcceleration.ToString("n3")},{board.BoardMpu6050.YGyroscopicAcceleration.ToString("n3")},{board.BoardMpu6050.ZGyroscopicAcceleration.ToString("n3")} ", colorB, 0, 10, 1, 1);
-
-                screen.DrawString("ACCEL", colorB, 0, 25, 1, 1);
-                screen.DrawString($"{board.BoardMpu6050.AccelerationX.ToString("n3")},{board.BoardMpu6050.AccelerationY.ToString("n3")},{board.BoardMpu6050.AccelerationZ.ToString("n3")} ", colorB, 0, 35, 1, 1);
-
-                screen.Flush();
-                board.BoardMpu6050.StopUpdating();
-                Thread.Sleep(300);
-            }*/
+            */
             
             #endregion
 
             #region DS18B20
             //Demo DS18B20
-            /*
-            board.SetupDS18B20(ESP32Pins.IO15);
+            
+            board.SetupDS18B20(ESP32Pins.IO04);
             board.SetupDisplay();
             var colorB = BasicGraphics.ColorFromRgb(255, 255, 255);
             var screen = board.BoardDisplay;
 
             while (true)
             {
-                board.BoardDS18B20.Update();
+                board.BoardDS18B20.Read();
                 screen.Clear();
                 screen.DrawString("Temperature", colorB, 0, 1, 1, 1);
                 screen.DrawString($"{board.BoardDS18B20.Temperature.ToString("n2")} C", colorB, 0, 6, 2, 2);
                 screen.Flush();
                 Thread.Sleep(2000);
             }
-            */
+            
             #endregion
 
             #region Potensiometer
