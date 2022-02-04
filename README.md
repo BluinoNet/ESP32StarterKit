@@ -163,7 +163,7 @@ board.SetupBuzzer(ESP32Pins.IO23);
 ## LDR and PIR
 ```
 board.SetupDisplay();
-            board.SetupLightSensor(0); // see https://docs.nanoframework.net/content/esp32/esp32_pin_out.html
+            board.SetupLightSensor(ESP32Pins.IO36, 0, ESP32ADCs.ADC0); // see https://docs.nanoframework.net/content/esp32/esp32_pin_out.html
             board.SetupPIR(ESP32Pins.IO22);
             var colorB = BasicGraphics.ColorFromRgb(255, 255, 255);
             var screen = board.BoardDisplay;
@@ -228,7 +228,7 @@ board.SetupDS18B20(ESP32Pins.IO15);
 ## Potensiometer
 ```
 board.SetupDisplay();
-            board.SetupPotentiometer(0); // see https://docs.nanoframework.net/content/esp32/esp32_pin_out.html
+            board.SetupPotentiometer(ESP32Pins.IO36, 0, ESP32ADCs.ADC0); // see https://docs.nanoframework.net/content/esp32/esp32_pin_out.html
             var colorB = BasicGraphics.ColorFromRgb(255, 255, 255);
             var screen = board.BoardDisplay;
             while (true)
