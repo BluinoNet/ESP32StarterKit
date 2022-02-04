@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace BluinoNet.Modules
 {
-    /*
+    
     public class MpuSensorValue
     {
         public float AccelerationX { get; set; }
@@ -26,12 +26,12 @@ namespace BluinoNet.Modules
     }
     public delegate void MpuSensorEventHandler(object source, MpuSensorEventArgs args);
     
-    public partial class MPU6050 : IDisposable
+    public partial class Mpu6050 : IDisposable
     {
         public event MpuSensorEventHandler SensorInterruptEvent;
 
         #region Constants
-
+        const int DelayTime = 100;
         public const byte ADDRESS = 0x68;
         private const byte PWR_MGMT_1 = 0x6B;
         private const byte SMPLRT_DIV = 0x19;
@@ -52,7 +52,6 @@ namespace BluinoNet.Modules
         private const Int32 INTERRUPT_PIN = 18;
         I2cDevice _mpu6050Device = null;
         private GpioController IoController;
-        private GpioPin InterruptPin;
 
         #region 12c
 
@@ -97,7 +96,7 @@ namespace BluinoNet.Modules
         }
 
         #endregion
-        public MPU6050(int I2cBusId=1)
+        public Mpu6050(int I2cBusId=1)
         {
             InitHardware(I2cBusId);
         }
@@ -106,10 +105,7 @@ namespace BluinoNet.Modules
             try
             {
                 IoController = new GpioController();
-                InterruptPin = IoController.OpenPin(INTERRUPT_PIN,PinMode.Output);
-                InterruptPin.Write(PinValue.Low);
-                InterruptPin.SetPinMode(PinMode.Input);
-                InterruptPin.ValueChanged += Interrupt;
+                
 
                 var settings = new I2cConnectionSettings(I2cBusId, ADDRESS, I2cBusSpeed.FastMode); //The slave's address and the bus speed.
                 _mpu6050Device = new I2cDevice(settings);
@@ -139,58 +135,81 @@ namespace BluinoNet.Modules
             }
         }
 
-       
-        private void Interrupt(object sender, PinValueChangedEventArgs args)
+        Thread Loop;
+        bool IsUpdating = false;
+
+        public void Looping()
         {
-            if (_mpu6050Device != null)
+            while (true)
             {
-                int interrupt_status = ReadByte(INT_STATUS);
-                if ((interrupt_status & 0x10) != 0)
+                if (_mpu6050Device != null)
                 {
-                    WriteByte(USER_CTRL, 0x44); // reset and enable fifo
-                }
-                if ((interrupt_status & 0x1) != 0)
-                {
-                    MpuSensorEventArgs ea = new MpuSensorEventArgs();
-                    ea.Status = (byte)interrupt_status;
-                    ea.SamplePeriod = 0.02f;
-                    ArrayList l = new ArrayList(); //new List<MpuSensorValue>();
-
-                    int count = ReadWord(FIFO_COUNT);
-
-                    while (count >= SensorBytes)
+                    int interrupt_status = ReadByte(INT_STATUS);
+                    if ((interrupt_status & 0x10) != 0)
                     {
-                        byte[] data = ReadBytes(FIFO_R_W, (byte)SensorBytes);
-                        count -= SensorBytes;
-
-                        short xa = (short)((int)data[0] << 8 | (int)data[1]);
-                        short ya = (short)((int)data[2] << 8 | (int)data[3]);
-                        short za = (short)((int)data[4] << 8 | (int)data[5]);
-
-                        short xg = (short)((int)data[6] << 8 | (int)data[7]);
-                        short yg = (short)((int)data[8] << 8 | (int)data[9]);
-                        short zg = (short)((int)data[10] << 8 | (int)data[11]);
-
-                        MpuSensorValue sv = new MpuSensorValue();
-                        sv.AccelerationX = (float)xa / (float)16384;
-                        sv.AccelerationY = (float)ya / (float)16384;
-                        sv.AccelerationZ = (float)za / (float)16384;
-                        sv.GyroX = (float)xg / (float)131;
-                        sv.GyroY = (float)yg / (float)131;
-                        sv.GyroZ = (float)zg / (float)131;
-                        l.Add(sv);
+                        WriteByte(USER_CTRL, 0x44); // reset and enable fifo
                     }
-                    ea.Values = (MpuSensorValue[])l.ToArray(typeof(MpuSensorValue));
-
-                    if (SensorInterruptEvent != null)
+                    if ((interrupt_status & 0x1) != 0)
                     {
-                        if (ea.Values.Length > 0)
+                        MpuSensorEventArgs ea = new MpuSensorEventArgs();
+                        ea.Status = (byte)interrupt_status;
+                        ea.SamplePeriod = 0.02f;
+                        ArrayList l = new ArrayList(); //new List<MpuSensorValue>();
+
+                        int count = ReadWord(FIFO_COUNT);
+
+                        while (count >= SensorBytes)
                         {
-                            SensorInterruptEvent(this, ea);
+                            byte[] data = ReadBytes(FIFO_R_W, (byte)SensorBytes);
+                            count -= SensorBytes;
+
+                            short xa = (short)((int)data[0] << 8 | (int)data[1]);
+                            short ya = (short)((int)data[2] << 8 | (int)data[3]);
+                            short za = (short)((int)data[4] << 8 | (int)data[5]);
+
+                            short xg = (short)((int)data[6] << 8 | (int)data[7]);
+                            short yg = (short)((int)data[8] << 8 | (int)data[9]);
+                            short zg = (short)((int)data[10] << 8 | (int)data[11]);
+
+                            MpuSensorValue sv = new MpuSensorValue();
+                            sv.AccelerationX = (float)xa / (float)16384;
+                            sv.AccelerationY = (float)ya / (float)16384;
+                            sv.AccelerationZ = (float)za / (float)16384;
+                            sv.GyroX = (float)xg / (float)131;
+                            sv.GyroY = (float)yg / (float)131;
+                            sv.GyroZ = (float)zg / (float)131;
+                            l.Add(sv);
+                        }
+                        ea.Values = (MpuSensorValue[])l.ToArray(typeof(MpuSensorValue));
+
+                        if (SensorInterruptEvent != null)
+                        {
+                            if (ea.Values.Length > 0)
+                            {
+                                SensorInterruptEvent(this, ea);
+                            }
                         }
                     }
                 }
+                Thread.Sleep(DelayTime);
+                if (!IsUpdating) break;
             }
+           
+        }
+        public void StartUpdating()
+        {
+           if(!IsUpdating)
+            {
+                Loop = new Thread(new ThreadStart(Looping));
+                IsUpdating = true;
+                Loop.Start();
+            }
+        }
+
+        public void StopUpdating()
+        {
+            IsUpdating = false;
+         
         }
 
         #region IDisposable Support
@@ -200,7 +219,6 @@ namespace BluinoNet.Modules
         {
             if (!disposedValue)
             {
-                InterruptPin.Dispose();
                 if (_mpu6050Device != null)
                 {
                     _mpu6050Device.Dispose();
@@ -211,7 +229,7 @@ namespace BluinoNet.Modules
             }
         }
 
-        ~MPU6050()
+        ~Mpu6050()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(false);
@@ -227,7 +245,7 @@ namespace BluinoNet.Modules
         #endregion
 
     }
-    */
+    /*
     public class AccelerationConditionChangeResult
     {
         protected AccelerationConditions _newValue = new AccelerationConditions();
@@ -692,5 +710,5 @@ namespace BluinoNet.Modules
                 return (s * scale) + offset;
             }
         }
-    }
+    }*/
 }

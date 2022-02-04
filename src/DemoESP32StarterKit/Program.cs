@@ -106,7 +106,7 @@ namespace DemoESP32StarterKit
             #endregion
 
             #region LDR and PIR
-            
+            /*
             board.SetupDisplay();
             board.SetupLightSensor(ESP32Pins.IO36, 0, ESP32ADCs.ADC0); // see https://docs.nanoframework.net/content/esp32/esp32_pin_out.html
             board.SetupPIR(ESP32Pins.IO22);
@@ -127,19 +127,33 @@ namespace DemoESP32StarterKit
                 Thread.Sleep(500);
 
             }
-            
+            */
             #endregion
 
             #region MPU6050
-            /*
+            
             board.SetupMpu6050();
             board.SetupDisplay();
             var colorB = BasicGraphics.ColorFromRgb(255, 255, 255);
             var screen = board.BoardDisplay;
-           
+            board.BoardMpu6050.StartUpdating();
+            board.BoardMpu6050.SensorInterruptEvent += (a, e) => {
+                screen.Clear();
+                for (int i = 0; i < e.Values.Length; i++)
+                {
+                    screen.DrawString("ACCEL", colorB, 0, 1, 1, 1);
+                    screen.DrawString($"{e.Values[i].AccelerationX.ToString("n3")},{e.Values[i].AccelerationY.ToString("n3")},{e.Values[i].AccelerationZ.ToString("n3")} ", colorB, 0, 10, 1, 1);
+
+                    screen.DrawString("GYRO", colorB, 0, 25, 1, 1);
+                    screen.DrawString($"{e.Values[i].GyroX.ToString("n3")},{e.Values[i].GyroY.ToString("n3")},{e.Values[i].GyroZ.ToString("n3")} ", colorB, 0, 35, 1, 1);
+                    break;
+                }
+                screen.Flush();
+            };
+            /*
             while (true)
             {
-                board.BoardMpu6050.StartUpdating();
+            
                 screen.Clear();
                 screen.DrawString("GYRO", colorB, 0, 1, 1, 1);
                 screen.DrawString($"{board.BoardMpu6050.XGyroscopicAcceleration.ToString("n3")},{board.BoardMpu6050.YGyroscopicAcceleration.ToString("n3")},{board.BoardMpu6050.ZGyroscopicAcceleration.ToString("n3")} ", colorB, 0, 10, 1, 1);
@@ -150,8 +164,8 @@ namespace DemoESP32StarterKit
                 screen.Flush();
                 board.BoardMpu6050.StopUpdating();
                 Thread.Sleep(300);
-            }
-            */
+            }*/
+            
             #endregion
 
             #region DS18B20
