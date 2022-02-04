@@ -1,4 +1,5 @@
-﻿using System;
+﻿using nanoFramework.Hardware.Esp32;
+using System;
 using System.Device.Adc;
 using System.Text;
 
@@ -11,11 +12,11 @@ namespace BluinoNet.Modules
 
 		/// <summary>Constructs a new instance.</summary>
 		/// <param name="socketNumber">The socket that this module is plugged in to.</param>
-		public Potentiometer(int channelNum)
+		public Potentiometer(int PinNumber)
 		{
-
+			Configuration.SetPinFunction(PinNumber, DeviceFunction.ADC1_CH1);
 			AdcController adc1 = new AdcController();
-			this.input = adc1.OpenChannel(channelNum);
+			this.input = adc1.OpenChannel(1);
 			//this.input = GTI.AnalogInputFactory.Create(socket, Socket.Pin.Three, this);
 		}
 

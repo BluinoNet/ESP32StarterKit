@@ -195,9 +195,9 @@ namespace BluinoNet
 
         }
 
-        public void SetupLightSensor(int ChannelNum)
+        public void SetupLightSensor(int PinNumber)
         {
-            this.BoardLightSensor = new LDR (ChannelNum);
+            this.BoardLightSensor = new LDR (PinNumber);
             IsInitLight = true;
 
         }
@@ -225,10 +225,10 @@ namespace BluinoNet
         {
             Modules.FatFsNano.MicroSdConfiguration.Setup(CSPin,1);
         }
-        public void SetupDHT11(int PinNumber)
+        public void SetupDHT11(int PinEcho, int PinTrigger)
         {
           
-            BoardDHT11 = new  DHT11Module(PinNumber);   
+            BoardDHT11 = new  DHT11Module(PinTrigger,PinEcho);   
             IsInitDHT11 = true;
 
         }
