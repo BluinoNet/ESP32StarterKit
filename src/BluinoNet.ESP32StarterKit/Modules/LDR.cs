@@ -1,7 +1,9 @@
 ﻿using nanoFramework.Hardware.Esp32;
 using System;
+using System.Diagnostics;
 using System.Device.Adc;
 using System.Text;
+//using Windows.Devices.Adc;
 
 namespace BluinoNet.Modules
 {
@@ -14,12 +16,13 @@ namespace BluinoNet.Modules
 
 		/// <summary>Constructs a new instance.</summary>
 		/// <param name="socketNumber">The socket that this module is plugged in to.</param>
-		public LDR(int PinNumber)
+		public LDR(int PinNumber, int ChannelNumber, DeviceFunction Adc)
 		{
-			Configuration.SetPinFunction(PinNumber, DeviceFunction.ADC1_CH0);
+			Configuration.SetPinFunction(PinNumber, Adc);
 			AdcController adc1 = new AdcController();
-			this.input = adc1.OpenChannel(0);
-			//this.input = GTI.AnalogInputFactory.Create(socket, Socket.Pin.Three, this);
+
+			this.input = adc1.OpenChannel(ChannelNumber);
+			
 		}
 
 		/// <summary>The voltage returned from the sensor.</summary>
@@ -41,7 +44,7 @@ namespace BluinoNet.Modules
 		public double GetIlluminance()
 		{
 
-			return this.input.ReadRatio() * LDR.MAX_ILLUMINANCE;
+			return (1-this.input.ReadRatio()) * LDR.MAX_ILLUMINANCE;
 		}
 	}
 }

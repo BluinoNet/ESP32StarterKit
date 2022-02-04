@@ -106,9 +106,9 @@ namespace DemoESP32StarterKit
             #endregion
 
             #region LDR and PIR
-            /*
+            
             board.SetupDisplay();
-            board.SetupLightSensor(0); // see https://docs.nanoframework.net/content/esp32/esp32_pin_out.html
+            board.SetupLightSensor(ESP32Pins.IO36, 0, ESP32ADCs.ADC0); // see https://docs.nanoframework.net/content/esp32/esp32_pin_out.html
             board.SetupPIR(ESP32Pins.IO22);
             var colorB = BasicGraphics.ColorFromRgb(255, 255, 255);
             var screen = board.BoardDisplay;
@@ -127,7 +127,7 @@ namespace DemoESP32StarterKit
                 Thread.Sleep(500);
 
             }
-            */
+            
             #endregion
 
             #region MPU6050
@@ -177,7 +177,7 @@ namespace DemoESP32StarterKit
             #region Potensiometer
             /*
             board.SetupDisplay();
-            board.SetupPotentiometer(0); // see https://docs.nanoframework.net/content/esp32/esp32_pin_out.html
+            board.SetupPotentiometer(ESP32Pins.IO36, 0, ESP32ADCs.ADC0); // see https://docs.nanoframework.net/content/esp32/esp32_pin_out.html
             var colorB = BasicGraphics.ColorFromRgb(255, 255, 255);
             var screen = board.BoardDisplay;
             while (true)

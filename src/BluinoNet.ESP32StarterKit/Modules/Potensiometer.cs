@@ -12,12 +12,12 @@ namespace BluinoNet.Modules
 
 		/// <summary>Constructs a new instance.</summary>
 		/// <param name="socketNumber">The socket that this module is plugged in to.</param>
-		public Potentiometer(int PinNumber)
+		public Potentiometer(int PinNumber, int ChannelNumber, DeviceFunction Adc)
 		{
-			Configuration.SetPinFunction(PinNumber, DeviceFunction.ADC1_CH1);
+			Configuration.SetPinFunction(PinNumber, Adc);
 			AdcController adc1 = new AdcController();
-			this.input = adc1.OpenChannel(1);
-			//this.input = GTI.AnalogInputFactory.Create(socket, Socket.Pin.Three, this);
+
+			this.input = adc1.OpenChannel(ChannelNumber);
 		}
 
 		/// <summary>The voltage returned from the sensor.</summary>

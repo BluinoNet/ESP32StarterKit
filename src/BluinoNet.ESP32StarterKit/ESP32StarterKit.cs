@@ -195,9 +195,9 @@ namespace BluinoNet
 
         }
 
-        public void SetupLightSensor(int PinNumber)
+        public void SetupLightSensor(int PinNumber, int ChannelNumber, int AdcDev)
         {
-            this.BoardLightSensor = new LDR (PinNumber);
+            this.BoardLightSensor = new LDR (PinNumber,ChannelNumber,(DeviceFunction)AdcDev);
             IsInitLight = true;
 
         }
@@ -207,9 +207,9 @@ namespace BluinoNet
             IsInitTouch = true;
 
         }
-        public void SetupPotentiometer(int PinNumber)
-        {   
-            this.BoardPotentiometer = new Potentiometer (PinNumber);
+        public void SetupPotentiometer(int PinNumber, int ChannelNumber, int AdcDev)
+        {
+            this.BoardPotentiometer = new Potentiometer (PinNumber, ChannelNumber, (DeviceFunction)AdcDev);
             IsInitPotentiometer = true;
 
         }
@@ -273,6 +273,31 @@ namespace BluinoNet
         public const DeviceFunction PWM14 = DeviceFunction.PWM14;
         public const DeviceFunction PWM15 = DeviceFunction.PWM15;
         public const DeviceFunction PWM16 = DeviceFunction.PWM16;
+
+    }
+    
+    public class ESP32ADCs
+    {
+        public const int ADC0 = (int)DeviceFunction.ADC1_CH0;
+        public const int ADC1 = (int)DeviceFunction.ADC1_CH1;
+        public const int ADC2 = (int)DeviceFunction.ADC1_CH2;
+        public const int ADC3 = (int)DeviceFunction.ADC1_CH3;
+        public const int ADC4 = (int)DeviceFunction.ADC1_CH4;
+        public const int ADC5 = (int)DeviceFunction.ADC1_CH5;
+        public const int ADC6 = (int)DeviceFunction.ADC1_CH6;
+        public const int ADC7 = (int)DeviceFunction.ADC1_CH7;
+        public const int ADC8 = (int)DeviceFunction.ADC1_CH8;
+        public const int ADC9 = (int)DeviceFunction.ADC1_CH9;
+        public const int ADC10 =(int)DeviceFunction.ADC1_CH10;
+        public const int ADC11 =(int)DeviceFunction.ADC1_CH11;
+        public const int ADC12 =(int)DeviceFunction.ADC1_CH12;
+        public const int ADC13 =(int)DeviceFunction.ADC1_CH13;
+        public const int ADC14 =(int)DeviceFunction.ADC1_CH14;
+        public const int ADC15 =(int)DeviceFunction.ADC1_CH15;
+        public const int ADC16 =(int)DeviceFunction.ADC1_CH16;
+        public const int ADC17 =(int)DeviceFunction.ADC1_CH17;
+        public const int ADC18 =(int)DeviceFunction.ADC1_CH18;
+        public const int ADC19 = (int)DeviceFunction.ADC1_CH19;
 
     }
     public class ESP32Pins
