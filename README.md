@@ -208,14 +208,14 @@ board.SetupMpu6050();
 
 ## DS18B20
 ```
-board.SetupDS18B20(ESP32Pins.IO15);
+board.SetupDS18B20(ESP32Pins.IO04);
             board.SetupDisplay();
             var colorB = BasicGraphics.ColorFromRgb(255, 255, 255);
             var screen = board.BoardDisplay;
 
             while (true)
             {
-                board.BoardDS18B20.Update();
+                board.BoardDS18B20.Read();
                 screen.Clear();
                 screen.DrawString("Temperature", colorB, 0, 1, 1, 1);
                 screen.DrawString($"{board.BoardDS18B20.Temperature.ToString("n2")} C", colorB, 0, 6, 2, 2);
