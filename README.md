@@ -80,6 +80,20 @@ board.SetupLed(ESP32Pins.IO23, ESP32Pins.IO02, ESP32Pins.IO04, ESP32Pins.IO05);
             }
 ```
 
+## Servo
+
+```
+board.SetupServo(ESP32Pins.IO05);
+            var Deg = 0;
+            while (true)
+            {
+                if (Deg > 180) Deg = 0;
+                board.BoardServo.Set(Deg);
+                Thread.Sleep(500);
+                Deg += 10;
+            }
+```
+
 ## Button and RGB LED
 ```
 board.SetupButton(ESP32Pins.IO12, ESP32Pins.IO14);
