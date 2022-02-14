@@ -12,7 +12,36 @@ namespace BluinoNet.Modules
         private Queue playlist;
         private Thread worker;
         private object syncRoot;
+        public static int Scale(
+      double value,
+      int originalMin,
+      int originalMax,
+      int scaleMin,
+      int scaleMax)
+        {
+            double num1 = (double)(scaleMax - scaleMin) / (double)(originalMax - originalMin);
+            int num2 = (int)((double)scaleMin + (value - (double)originalMin) * num1);
+            if (num2 > scaleMax)
+                return scaleMax;
+            return num2 >= scaleMin ? num2 : scaleMin;
+        }
 
+        public void Out(int oValue,double volume, double playTime)
+        {
+            var volume1 = volume == 0.0 ? 0.0 : (double)Scale(volume, 0, 100, 1, 50) / 100.0;
+            this.pwm.DutyCycle = volume1;
+            if (oValue > 0.0 && volume1 > 0.0)
+            {
+                this.pwm.Frequency = (oValue);
+                this.pwm.Start();
+                if (playTime <= 0.0)
+                    return;
+                Thread.Sleep((int)(playTime * 1000.0));
+                this.pwm.Stop();
+            }
+            else
+                this.pwm.Stop();
+        }
         /// <summary>Whether or not there is something being played.</summary>
         public bool IsPlaying
         {

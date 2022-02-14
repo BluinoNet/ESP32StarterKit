@@ -24,6 +24,7 @@
     <Compile Include="Modules\DHT11Module.cs" />
     <Compile Include="Modules\DS18B20.cs" />
     <Compile Include="Modules\HCSR04.cs" />
+    <Compile Include="Modules\Image.cs" />
     <Compile Include="Modules\LDR.cs" />
     <Compile Include="Modules\Led.cs" />
     <Compile Include="Modules\MicroSd\DiskIO.cs" />

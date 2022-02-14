@@ -30,5 +30,40 @@ namespace BluinoNet
             screen.Dispose();
             //do nothing
         }
+
+
+        public Image CreateImage(
+          int width,
+          int height,
+          double[] data,
+          int hScale,
+          int vScale,
+          Image.Transform transform)
+        {
+          
+            return new Image(data, width, height, hScale, vScale, transform);
+        }
+
+        public Image CreateImage(
+          int width,
+          int height,
+          string data,
+          int hScale,
+          int vScale,
+          Image.Transform transform)
+        {
+           
+            return new Image(data, width, height, hScale, vScale, transform);
+        }
+
+        public void DrawImage(Image img, int x, int y)
+        {
+            int num = 0;
+            for (int index1 = 0; index1 < img.Height; ++index1)
+            {
+                for (int index2 = 0; index2 < img.Width; ++index2)
+                    this.SetPixel(x + index2, y + index1, (uint)img.Data[num++]);
+            }
+        }
     }
 }
