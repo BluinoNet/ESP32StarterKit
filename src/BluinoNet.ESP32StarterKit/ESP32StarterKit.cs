@@ -183,7 +183,7 @@ namespace BluinoNet
 
         public void SetupServo(int PinServo)
         {
-            this.BoardServo = new ServoController(PinServo);
+            this.BoardServo = new ServoController(PinServo,ESP32Pwms.PWM8);
             IsInitServo = true;
 
         }

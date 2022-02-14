@@ -16,6 +16,21 @@ namespace DemoESP32StarterKit
         {
             board = new ESP32StarterKit();
 
+            #region Servo
+            //demo servo - uncomment to use. pin d5
+            
+            board.SetupServo(ESP32Pins.IO05);
+            var Deg = 0;
+            while (true)
+            {
+                if (Deg > 180) Deg = 0;
+                board.BoardServo.Set(Deg);
+                Thread.Sleep(500);
+                Deg += 10;
+            }
+            
+            #endregion 
+            
             #region LED
             //demo LED - uncomment to use. pin 23, pin 2, pin 4, pin 5
             /*
