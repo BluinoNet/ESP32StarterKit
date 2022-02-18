@@ -401,6 +401,44 @@ private static void SetupAndConnectNetwork()
             }
 ```
 
+## MQTT
+```
+// STEP 1: setup network
+            // You need to set WiFi connection credentials in the configuration first!
+            // Go to Device Explorer -> Edit network configuration -> WiFi proiles and set SSID and password there.
+            SetupAndConnectNetwork();
+
+            // STEP 2: connect to MQTT broker
+            // Warning: test.mosquitto.org is very slow and congested, and is only suitable for very basic validation testing.
+            // Change it to your local broker as soon as possible.
+            var client = new MqttClient("test.mosquitto.org");
+            var clientId = Guid.NewGuid().ToString();
+            client.Connect(clientId);
+
+            // STEP 3: subscribe to topics you want
+            client.Subscribe(new[] { "nf-mqtt/basic-demo" }, new[] { MqttQoSLevel.AtLeastOnce });
+            client.MqttMsgPublishReceived += HandleIncomingMessage;
+
+            // STEP 4: publish something and watch it coming back
+            for (int i = 0; i < 5; i++)
+            {
+                client.Publish("nf-mqtt/basic-demo", Encoding.UTF8.GetBytes("===== Hello MQTT! ====="), MqttQoSLevel.AtLeastOnce, false);
+                Thread.Sleep(5000);
+            }
+
+            // STEP 5: disconnecting
+            client.Disconnect();
+
+            // App must not return.
+            Thread.Sleep(Timeout.Infinite);
+        }
+
+        private static void HandleIncomingMessage(object sender, MqttMsgPublishEventArgs e)
+        {
+            Debug.WriteLine($"Message received: {Encoding.UTF8.GetString(e.Message, 0, e.Message.Length)}");
+        }
+```
+
 Enjoy and Cheers :D.
 
 -BluinoNet Team from Buitenzorg Makers Club
