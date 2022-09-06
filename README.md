@@ -283,6 +283,161 @@ board.SetupHCSR04(ESP32Pins.IO13,ESP32Pins.IO12);
             }
 ```
 
+## Connect to Wifi
+```
+private static void SetupAndConnectNetwork()
+        {
+            // Get the first WiFI Adapter
+            var wifiAdapter = WiFiAdapter.FindAllAdapters()[0];
+
+            // Begin network scan.
+            wifiAdapter.ScanAsync();
+
+            // While networks are being scan, continue on configuration. If networks were set previously, 
+            // board may already be auto-connected, so reconnection is not even needed.
+            var wiFiConfiguration = Wireless80211Configuration.GetAllWireless80211Configurations()[0];
+            var ipAddress = NetworkInterface.GetAllNetworkInterfaces()[0].IPv4Address;
+            var needToConnect = string.IsNullOrEmpty(ipAddress) || (ipAddress == "0.0.0.0");
+            while (needToConnect)
+            {
+                foreach (var network in wifiAdapter.NetworkReport.AvailableNetworks)
+                {
+                    // Show all networks found
+                    Debug.WriteLine($"Net SSID :{network.Ssid},  BSSID : {network.Bsid},  rssi : {network.NetworkRssiInDecibelMilliwatts},  signal : {network.SignalBars}");
+
+                    // If its our Network then try to connect
+                    if (network.Ssid == wiFiConfiguration.Ssid)
+                    {
+
+                        var result = wifiAdapter.Connect(network, WiFiReconnectionKind.Automatic, wiFiConfiguration.Password);
+
+                        if (result.ConnectionStatus == WiFiConnectionStatus.Success)
+                        {
+                            Debug.WriteLine($"Connected to Wifi network {network.Ssid}.");
+                            needToConnect = false;
+                        }
+                        else
+                        {
+                            Debug.WriteLine($"Error {result.ConnectionStatus} connecting to Wifi network {network.Ssid}.");
+                        }
+                    }
+                }
+
+                Thread.Sleep(10000);
+            }
+
+            ipAddress = NetworkInterface.GetAllNetworkInterfaces()[0].IPv4Address;
+            Debug.WriteLine($"Connected to Wifi network with IP address {ipAddress}");
+        }
+```
+## Calling Webservice/Web
+```
+// follow some test URLs and root CA certificates
+
+            /////////////////////////////////////////////////////////////////////////////////////
+            ////add certificate in PEM format(as a string in the app)
+            //X509Certificate rootCACert = new X509Certificate(letsEncryptCACertificate);
+            ////test URL for Let's encrypt certificate
+            //string url = "https://www.howsmyssl.com";
+            /////////////////////////////////////////////////////////////////////////////////////
+
+            ///////////////////////////////////////////////////////////////////////////////////
+            // add certificate from resources in CRT format 
+            X509Certificate rootCACert = new X509Certificate(Resources.GetBytes(Resources.BinaryResources.DigiCertGlobalRootCA));
+            // test URL for DigiCert certificate
+            string url = "https://global-root-ca.chain-demos.digicert.com";
+            ///////////////////////////////////////////////////////////////////////////////////
+
+
+            Debug.WriteLine($"Performing Http request to: {url}");
+
+            // perform the request as a HttpWebRequest
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+            httpWebRequest.Method = "GET";
+
+            //////////////////////////////////////////////////////////////////////
+            // need to set the SSL protocol that the connection is going to use //
+            // *** this MANDATORY otherwise the authentication will fail ***    //
+            //////////////////////////////////////////////////////////////////////
+            httpWebRequest.SslProtocols = System.Net.Security.SslProtocols.Tls12;
+
+            // if the request is to a secured server we need to make sure that we either:
+            // 1. provide the root CA certificate 
+            // 2. the device has already stored a root CA bundle that will use when performing the authentication
+            httpWebRequest.HttpsAuthentCert = rootCACert;
+
+            // get the response as a HttpWebResponse
+            // wrap the response object with a using statement to make sure that it's disposed
+            using (var httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse())
+            {
+                // wrap the response stream on a using statement to make sure that it's disposed
+                using (var stream = httpWebResponse.GetResponseStream())
+                {
+                    // read response in chunks of 1k
+
+                    byte[] buffer = new byte[1024];
+                    int bytesRead = 0;
+                    int totalBytesRead = 0;
+
+                    Debug.WriteLine("Http response follows");
+                    Debug.WriteLine(">>>>>>>>>>>>>");
+
+                    do
+                    {
+                        bytesRead = stream.Read(buffer, 0, buffer.Length);
+
+                        if (bytesRead > 0)
+                        {
+                            totalBytesRead += bytesRead;
+                            Debug.Write(Encoding.UTF8.GetString(buffer, 0, bytesRead));
+                        }
+                    }
+                    while (totalBytesRead < httpWebResponse.ContentLength);
+                }
+
+                Debug.WriteLine(">>>>>>>>>>>>>");
+                Debug.WriteLine("End of Http response");
+                Debug.WriteLine($"Read {totalBytesRead} bytes");
+            }
+```
+
+## MQTT
+```
+// STEP 1: setup network
+            // You need to set WiFi connection credentials in the configuration first!
+            // Go to Device Explorer -> Edit network configuration -> WiFi proiles and set SSID and password there.
+            SetupAndConnectNetwork();
+
+            // STEP 2: connect to MQTT broker
+            // Warning: test.mosquitto.org is very slow and congested, and is only suitable for very basic validation testing.
+            // Change it to your local broker as soon as possible.
+            var client = new MqttClient("test.mosquitto.org");
+            var clientId = Guid.NewGuid().ToString();
+            client.Connect(clientId);
+
+            // STEP 3: subscribe to topics you want
+            client.Subscribe(new[] { "nf-mqtt/basic-demo" }, new[] { MqttQoSLevel.AtLeastOnce });
+            client.MqttMsgPublishReceived += HandleIncomingMessage;
+
+            // STEP 4: publish something and watch it coming back
+            for (int i = 0; i < 5; i++)
+            {
+                client.Publish("nf-mqtt/basic-demo", Encoding.UTF8.GetBytes("===== Hello MQTT! ====="), MqttQoSLevel.AtLeastOnce, false);
+                Thread.Sleep(5000);
+            }
+
+            // STEP 5: disconnecting
+            client.Disconnect();
+
+            // App must not return.
+            Thread.Sleep(Timeout.Infinite);
+        }
+
+        private static void HandleIncomingMessage(object sender, MqttMsgPublishEventArgs e)
+        {
+            Debug.WriteLine($"Message received: {Encoding.UTF8.GetString(e.Message, 0, e.Message.Length)}");
+        }
+```
 
 Enjoy and Cheers :D.
 
